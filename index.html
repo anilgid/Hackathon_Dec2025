@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Order Support Bot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      background: #f5f7fa;
+    }
+
+    /* ---------- LOGIN PAGE ---------- */
+    .login-page {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-card {
+      width: 360px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    }
+
+    .login-header {
+      background: #cd1409;
+      color: white;
+      padding: 16px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 10px 10px 0 0;
+    }
+
+    .login-body {
+      padding: 20px;
+    }
+
+    .login-body input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 14px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    .login-body button {
+      width: 100%;
+      padding: 12px;
+      background: #cd1409;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    /* ---------- DASHBOARD ---------- */
+    .dashboard {
+      height: 100vh;
+      display: none;
+      flex-direction: column;
+    }
+
+    .top-bar {
+      height: 55px;
+      background: #cd1409;
+      color: white;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background: #f9f9f9;
+    }
+
+    .message {
+      max-width: 70%;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+    }
+
+    .user {
+      background: #e3f2fd;
+      align-self: flex-end;
+    }
+
+    .bot {
+      background: #f1f3f4;
+      align-self: flex-start;
+    }
+
+    .chat-input {
+      height: 60px;
+      display: flex;
+      border-top: 1px solid #ddd;
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      outline: none;
+      font-size: 15px;
+    }
+
+    .chat-input button {
+      width: 120px;
+      border: none;
+      background: #cd1409;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div id="loginPage" class="login-page">
+    <div class="login-card">
+      <div class="login-header">🔐 Login</div>
+      <div class="login-body">
+        <input id="companyId" placeholder="Company ID" />
+        <input id="userId" placeholder="User ID" />
+        <input id="password" type="password" placeholder="Password (Optional)" />
+        <button onclick="login()">Login</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard" class="dashboard">
+    <div class="top-bar">
+      <div class="brand-title">
+        Fargo Fundu – The only banker who doesn’t put you on hold
+      </div>
+      <div id="userDisplay"></div>
+    </div>
+
+    <div class="chat-container">
+      <div id="messages" class="chat-messages"></div>
+
+      <div class="chat-input">
+        <input id="userInput" placeholder="Bolo problem kya hai… main dekh leta hoon" />
+        <button onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const loginPage = document.getElementById("loginPage");
+    const dashboard = document.getElementById("dashboard");
+    const userDisplay = document.getElementById("userDisplay");
+    const messagesDiv = document.getElementById("messages");
+    const userInput = document.getElementById("userInput");
+
+    function login() {
+      const companyId = document.getElementById("companyId").value.trim();
+      const userId = document.getElementById("userId").value.trim();
+      const password = document.getElementById("password").value;
+
+      if (!companyId || !userId) {
+        alert("Company ID and User ID are required");
+        return;
+      }
+
+      localStorage.setItem("companyId", companyId);
+      localStorage.setItem("userId", userId);
+      //localStorage.setItem("password", password || "");
+
+      loginPage.style.display = "none";
+      dashboard.style.display = "flex";
+      userDisplay.innerText = `🏢 ${companyId} | 👤 ${userId}`;
+    }
+
+    function addMessage(text, sender) {
+      const msg = document.createElement("div");
+      msg.classList.add("message", sender);
+      msg.innerText = text;
+      messagesDiv.appendChild(msg);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const messageText = userInput.value.trim();
+      if (!messageText) return;
+
+      addMessage(messageText, "user");
+      userInput.value = "";
+
+      const payload = {
+        companyId: localStorage.getItem("companyId"),
+        userId: localStorage.getItem("userId"),
+        password: localStorage.getItem("password"),
+        message: messageText
+      };
+
+      try {
+        const response = await fetch("/message", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        addMessage(data.agent_response || "No response", "bot");
+
+      } catch (err) {
+        addMessage("Server not reachable", "bot");
+      }
+    }
+
+    userInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
+
+</body>
+</html>
