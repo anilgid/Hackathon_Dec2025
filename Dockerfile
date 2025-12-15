@@ -20,7 +20,7 @@ COPY pyproject.toml .
 # Or since we don't have a requirements.txt, we can just install '.'
 #COPY src ./src
 COPY backend ./backend
-COPY README.md .
+#COPY README.md .
 
 # Install dependencies including the project itself
 RUN pip install --no-cache-dir . fastapi uvicorn httpx
