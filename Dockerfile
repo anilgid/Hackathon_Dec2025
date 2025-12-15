@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf 
 COPY pyproject.toml .
 # We can export requirements from uv or just install based on toml if pip supports it (modern pip does)
 # Or since we don't have a requirements.txt, we can just install '.'
-COPY src ./src
+#COPY src ./src
 COPY backend ./backend
 COPY README.md .
 
