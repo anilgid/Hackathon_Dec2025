@@ -98,9 +98,14 @@ class LLMFactory:
         - LLM_API_KEY: API key for the provider
         - LLM_MODEL: Model name (optional, uses defaults)
         """
-        provider = provider or os.getenv("LLM_PROVIDER")
-        api_key = api_key or os.getenv("LLM_API_KEY")
-        model = model or os.getenv("LLM_MODEL")
+        #provider = provider or os.getenv("LLM_PROVIDER")
+        #api_key = api_key or os.getenv("LLM_API_KEY")
+        #model = model or os.getenv("LLM_MODEL")
+
+        provider = "google"
+        api_key = "AIzaSyCWhRgarx6x8TPu0Uud1iA1Lch8ijvoZJE"
+        model = "gemini-3-pro-preview"
+        
         print(provider)
         if not api_key:
             raise ValueError("LLM_API_KEY environment variable not set")
